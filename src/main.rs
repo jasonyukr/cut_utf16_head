@@ -1,5 +1,6 @@
-use std::io::{self, BufRead};
+use std::io::{self, BufRead, Write};
 use std::env;
+use std::process;
 
 fn print_usage() {
     println!("{}", "Usage : cut_utf16_head num");
@@ -21,6 +22,7 @@ fn main() {
     }
 
     let stdin = io::stdin();
+    let mut stdout = io::stdout();
     for ln in stdin.lock().lines() {
         if let Ok(line) = ln {
 
@@ -28,7 +30,9 @@ fn main() {
             let mut chars = line.chars();
 
             if skip >= count {
-                println!("{}", "");
+                if let Err(_) = writeln!(stdout) {
+                    process::exit(1);
+                }
                 continue;
             }
 
@@ -37,7 +41,9 @@ fn main() {
                 chars.next();
                 i = i + 1;
             }
-            println!("{}", chars.as_str());
+            if let Err(_) = writeln!(stdout, "{}", chars.as_str()) {
+                process::exit(1);
+            }
         }
     }
 }
